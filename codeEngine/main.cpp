@@ -1,9 +1,9 @@
 #define SDL_MAIN_HANDLED
 
-#include"include/CommonFunc.hpp"
-#include"include/BaseObject.hpp"
-#include"include/GameMap.hpp"
-//g++ *.cpp -o main -Llib -lSDL2 -lSDL2_image
+#include"../include/CommonFunc.hpp"
+#include"../include/BaseObject.hpp"
+#include"../include/GameMap.hpp"
+//g++ codeEngine/*.cpp -o main -Llib -lSDL2 -lSDL2_image
 
 BaseObject backGround;
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
     init();
     loadBackGround();
     GameMap map;
-    char mapName[18] = "./save/map01.dat";
+    char mapName[20] = "save/map01.dat";
     map.LoadMap(mapName);
     map.LoadTile(gRenderer);
 

@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 
-#include"include/GameMap.hpp"
+#include"../include/GameMap.hpp"
 
 void GameMap::LoadMap(char* FileName){
     FILE* fp =NULL;

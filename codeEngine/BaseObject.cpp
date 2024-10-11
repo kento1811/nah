@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 
-#include"include/BaseObject.hpp"
+#include"../include/BaseObject.hpp"
 
 void BaseObject::LoadImg(const char* fileName,SDL_Renderer* renderer){
     SDL_Texture* texture = NULL;
