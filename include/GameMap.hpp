@@ -13,6 +13,7 @@ class GameMap{
     void LoadMap(char* fileName);
     void LoadTile(SDL_Renderer* renderer);
     void DrawMap(SDL_Renderer* renderer);
+    Map getMap() const {return gameMap;};
     private:
     Map gameMap;
     BaseObject tileMat[MAX_TILE];

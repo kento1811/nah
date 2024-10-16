@@ -10,10 +10,10 @@ class BaseObject{
     SDL_Rect GetRect(){return rect;};
     SDL_Texture* GetTexture(){return objTex;};
 
-    void LoadImg(const char* fileName,SDL_Renderer* renderer);
+    virtual void LoadImg(const char* fileName,SDL_Renderer* renderer);
     void Render(SDL_Renderer* renderer,const SDL_Rect* clip = NULL);
     void Free();
-    private:
+    protected:
         SDL_Texture* objTex;
         SDL_Rect rect;
 };

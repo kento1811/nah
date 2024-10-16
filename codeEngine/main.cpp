@@ -3,6 +3,8 @@
 #include"../include/CommonFunc.hpp"
 #include"../include/BaseObject.hpp"
 #include"../include/GameMap.hpp"
+#include"../include/MainObject.hpp"
+
 //g++ codeEngine/*.cpp -o main -Llib -lSDL2 -lSDL2_image
 //git add*
 //git commit -m " "
@@ -50,22 +52,42 @@ int main(int argc, char* argv[]){
     map.LoadMap(mapName);
     map.LoadTile(gRenderer);
 
+    MainObject player;
+    player.SetRect({0,0,480,64});
+    player.LoadImg("save/player_right.png",gRenderer);
+    player.SetClip();
+
+    int fps = 1000/FRAME_RATE;
     bool isRunning =true;
     while(isRunning){
+        int frameRateStart = SDL_GetTicks();
 
         while(SDL_PollEvent(&gEvent) != 0){
             if(gEvent.type == SDL_QUIT){
                 isRunning = false;
             }
+
+            player.HandleInputAction(gEvent,gRenderer);
         }
+
 
         SDL_RenderClear(gRenderer);
 
         backGround.Render(gRenderer);
         map.DrawMap(gRenderer);
 
+        Map mapData = map.getMap();
+        player.DoPlayer(mapData);
+        player.Show(gRenderer);
+
         SDL_RenderPresent(gRenderer);
 
+
+        int delta = SDL_GetTicks() - frameRateStart;
+        if(delta < fps){
+            SDL_Delay(fps-delta);
+        }
+        
     }
 
     Close();
