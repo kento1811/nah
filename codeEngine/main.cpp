@@ -6,7 +6,7 @@
 #include"../include/MainObject.hpp"
 
 //g++ codeEngine/*.cpp -o main -Llib -lSDL2 -lSDL2_image
-//git add*
+//git add *
 //git commit -m " "
 //git push origin master
 
