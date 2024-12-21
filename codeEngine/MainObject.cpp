@@ -198,6 +198,8 @@ void MainObject::CheckToMap(Map& mapData){
 
     if(x1 >=0 && x2<=MAX_MAP_X && y1>=0 && y2 <= MAX_MAP_Y){
 
+        if(posY > groundPos){onGround = false;};
+
         if(valY >0){
             if(mapData.tile[y2][x1] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
                 posY = y2*TILE_SIZE;

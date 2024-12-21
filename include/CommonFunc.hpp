@@ -23,7 +23,7 @@
 #define MAX_MAP_X 400
 #define MAX_MAP_Y 10
 
-#define JUMP_COOLDOWN 5
+#define JUMP_COOLDOWN 15
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
