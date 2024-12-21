@@ -1,7 +1,8 @@
 #pragma once
 
 #include<windows.h>
-#include"string"
+#include<string.h>
+#include <stdio.h>
 #include"../bin/SDL2/SDL.h"
 #include"../bin/SDL2/SDL_image.h"
 #include<iostream>
@@ -21,6 +22,8 @@
 #define TILE_SIZE 64
 #define MAX_MAP_X 400
 #define MAX_MAP_Y 10
+
+#define JUMP_COOLDOWN 5
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;

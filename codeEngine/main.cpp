@@ -74,11 +74,16 @@ int main(int argc, char* argv[]){
         SDL_RenderClear(gRenderer);
 
         backGround.Render(gRenderer);
-        map.DrawMap(gRenderer);
+        
 
         Map mapData = map.getMap();
+
+        player.SetMapXY(mapData.startX,mapData.startY);
         player.DoPlayer(mapData);
         player.Show(gRenderer);
+
+        map.SetMap(mapData);
+        map.DrawMap(gRenderer);
 
         SDL_RenderPresent(gRenderer);
 

@@ -14,6 +14,7 @@ class GameMap{
     void LoadTile(SDL_Renderer* renderer);
     void DrawMap(SDL_Renderer* renderer);
     Map getMap() const {return gameMap;};
+    void SetMap(Map&  mapData){gameMap = mapData;};
     private:
     Map gameMap;
     BaseObject tileMat[MAX_TILE];

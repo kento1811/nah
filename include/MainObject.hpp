@@ -18,7 +18,11 @@ class MainObject : public BaseObject {
     inputType.right=0;
     inputType.up=0;
     onGround = false;
-    status = -1;};
+    status = -1;
+    mapX = 0;
+    mapY = 0;
+    jumpCooldown =0;
+    };
     ~MainObject(){BaseObject::Free();};
 
     enum WalkType{
@@ -31,6 +35,8 @@ class MainObject : public BaseObject {
     void SetClip();
     void DoPlayer(Map& mapData);
     void CheckToMap(Map& mapData);
+    void SetMapXY(int X, int Y){mapX = X; mapY = Y;};
+    void CenterMap(Map& gameMap);
 
     private:
     bool onGround;
@@ -49,4 +55,9 @@ class MainObject : public BaseObject {
     int frame;
     int status;
 
+    int mapX;
+    int mapY;
+
+    float groundPos;
+    int jumpCooldown;
 };

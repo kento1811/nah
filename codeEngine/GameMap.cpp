@@ -4,7 +4,7 @@
 
 void GameMap::LoadMap(char* FileName){
     FILE* fp =NULL;
-    fopen_s(&fp,FileName,"rb");
+    fp = fopen(FileName,"rb");
     if(fp == NULL){
         return;
     }
@@ -13,7 +13,7 @@ void GameMap::LoadMap(char* FileName){
     gameMap.maxY =0;
     for(int i= 0; i<MAX_MAP_Y;i++){
         for(int j =0;j<MAX_MAP_X;j++){
-            fscanf_s(fp,"%d",&gameMap.tile[i][j]);
+            fscanf(fp,"%d",&gameMap.tile[i][j]);
             int val = gameMap.tile[i][j];
             if(val>0){
                 if(i> gameMap.maxY ){
@@ -42,8 +42,8 @@ void GameMap::LoadTile(SDL_Renderer* renderer){
     FILE* fp =NULL;
 
     for(int i =0 ;i<MAX_TILE;i++){
-        sprintf_s(fileImg,"save/%d.png",i);
-        fopen_s(&fp,fileImg,"rb");
+        sprintf(fileImg,"save/%d.png",i);
+        fp = fopen(fileImg,"rb");
 
         if(fp == NULL){
             continue;

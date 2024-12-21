@@ -22,21 +22,37 @@ void MainObject::SetClip(){
 }
 
 void MainObject::Show(SDL_Renderer* renderer){
-    if(status == WALK_LEFT){
-        LoadImg("save/player_left.png",renderer);
+    
+    if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1) && inputType.jump ==0){
+        if(status == WALK_LEFT){
+            LoadImg("save/player_left.png",renderer);
+        }
+        else {
+            LoadImg("save/player_right.png",renderer);
+        }
     }
-    else {
-        LoadImg("save/player_right.png",renderer);
+    if(inputType.jump ==1 ){
+        if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1)){
+            if(status == WALK_LEFT){
+                LoadImg("save/jum_left.png",renderer);
+            }
+            else {
+                LoadImg("save/jum_right.png",renderer);
+            }
+        }
     }
-
-    if(inputType.left == 1 || inputType.right ==1){
-        frame = (++frame)%8;
+    
+    if(inputType.left == 1 && inputType.right ==1){
+        frame =0;
+    }
+    else if(inputType.left == 1 || inputType.right ==1){
+        frame = ((++frame)%16);
     } else {frame =0;};
 
-    rect.x = posX;
-    rect.y = posY;
+    rect.x = posX - mapX;
+    rect.y = posY - mapY;
 
-    SDL_Rect* currentClip = &frameClip[frame];
+    SDL_Rect* currentClip = &frameClip[frame/2];
     SDL_Rect renderQuad = {rect.x,rect.y,widthFrame,heightFrame};
 
     SDL_RenderCopy(renderer,objTex,currentClip,&renderQuad);
@@ -48,20 +64,21 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
         switch (e.key.keysym.sym)
         {
         case SDLK_SPACE:
-            inputType.jump =1;
+        case SDLK_UP:
+        case SDLK_w:
+            inputType.jump =jumpCooldown !=0 ? 0:1;
             break;
+
         case SDLK_RIGHT:
         case SDLK_d:
             status = WALK_RIGHT;
             inputType.right = 1;
-            inputType.left=0;
-        break;
+            break;
 
         case SDLK_LEFT:
         case SDLK_a:
             status = WALK_LEFT;
             inputType.left = 1;
-            inputType.right=0;
             break;
         }
 
@@ -70,8 +87,12 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
         switch (e.key.keysym.sym)
         {
         case SDLK_SPACE:
+        case SDLK_UP:
+        case SDLK_w:
             inputType.jump =0;
+            jumpCooldown = JUMP_COOLDOWN;
             break;
+
         case SDLK_RIGHT:
         case SDLK_d:
             inputType.right = 0;
@@ -101,7 +122,36 @@ void MainObject::DoPlayer(Map& mapData){
         valX += PLAYER_SPEED;
     }
 
+    if(inputType.jump ==1 && onGround && jumpCooldown == 0){
+        
+        valY = -6*GRAVITY_SPEED;
+
+        if(-posY + groundPos > 3*TILE_SIZE +16){
+            onGround = false;
+            jumpCooldown = JUMP_COOLDOWN;
+        }
+    }
+
     CheckToMap(mapData);
+    CenterMap(mapData);
+}
+
+void MainObject::CenterMap(Map& gameMap){
+
+    gameMap.startX = posX - (SCREEN_WIDTH/2);
+    if(gameMap.startX <0){
+        gameMap.startX = 0;
+    } else if(gameMap.startX + SCREEN_WIDTH >= gameMap.maxX){
+        gameMap.startX = gameMap.maxY - SCREEN_WIDTH;
+    }
+
+    gameMap.startY = posY - (SCREEN_HEIGHT/2);
+    if(gameMap.startY <0){
+        gameMap.startY = 0;
+    } else if(gameMap.startY + SCREEN_HEIGHT >= gameMap.maxY){
+        gameMap.startY = gameMap.maxY - SCREEN_HEIGHT;
+    }
+
 }
 
 void MainObject::CheckToMap(Map& mapData){
@@ -136,7 +186,7 @@ void MainObject::CheckToMap(Map& mapData){
             }
         }
     }
-
+    
     //check vertical
     int widthMin = widthFrame < TILE_SIZE ? widthFrame : TILE_SIZE;
 
@@ -154,12 +204,15 @@ void MainObject::CheckToMap(Map& mapData){
                 posY -=  heightFrame +1;
                 valY =0;
                 onGround =true;
+                groundPos = posY;
+                jumpCooldown = jumpCooldown == 0 ?0: jumpCooldown -1 ;
             }
         }
         else if(valY <0){
             if(mapData.tile[y1][x1] != BLANK_TILE || mapData.tile[y1][x2] != BLANK_TILE){
                 posY = (y1+1)*TILE_SIZE;
                 valY=0;
+                onGround =false;
             }
         }
     }
@@ -173,15 +226,17 @@ void MainObject::CheckToMap(Map& mapData){
         posX =0;
     }
 
-    if(posX + widthFrame > SCREEN_WIDTH){
+    if(posX + widthFrame - mapX > SCREEN_WIDTH){
         posX = SCREEN_WIDTH-widthFrame -1;
     }
 
     if(posY <0){
         posY =0;
+        onGround =false;
     }
 
-    if(posY + heightFrame > SCREEN_HEIGHT){
+    if(posY + heightFrame -mapY> SCREEN_HEIGHT){
         posY = SCREEN_HEIGHT-heightFrame -1;
     }
+    
 }
