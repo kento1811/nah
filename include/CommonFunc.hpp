@@ -7,9 +7,9 @@
 #include"../bin/SDL2/SDL_image.h"
 #include<iostream>
 
-#define GRAVITY_SPEED 0.8
-#define MAX_FALL_SPEED 10
-#define PLAYER_SPEED 5
+#define GRAVITY_SPEED 3
+#define MAX_FALL_SPEED 15
+#define PLAYER_SPEED 7
 #define BLANK_TILE 0
 
 #define SCREEN_WIDTH 1280
@@ -17,13 +17,13 @@
 #define COLOR_KEY_R 100
 #define COLOR_KEY_G 60
 #define COLOR_KEY_B 100
-#define FRAME_RATE 144
+#define FRAME_RATE 68
 
 #define TILE_SIZE 64
 #define MAX_MAP_X 400
 #define MAX_MAP_Y 10
 
-#define JUMP_COOLDOWN 15
+#define JUMP_COOLDOWN 5
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;

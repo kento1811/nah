@@ -124,12 +124,9 @@ void MainObject::DoPlayer(Map& mapData){
 
     if(inputType.jump ==1 && onGround && jumpCooldown == 0){
         
-        valY = -6*GRAVITY_SPEED;
-
-        if(-posY + groundPos > 3*TILE_SIZE +16){
-            onGround = false;
-            jumpCooldown = JUMP_COOLDOWN;
-        }
+        valY = -12*GRAVITY_SPEED;
+        onGround = false;
+        jumpCooldown = JUMP_COOLDOWN;
     }
 
     CheckToMap(mapData);
@@ -142,7 +139,7 @@ void MainObject::CenterMap(Map& gameMap){
     if(gameMap.startX <0){
         gameMap.startX = 0;
     } else if(gameMap.startX + SCREEN_WIDTH >= gameMap.maxX){
-        gameMap.startX = gameMap.maxY - SCREEN_WIDTH;
+        gameMap.startX = gameMap.maxX - SCREEN_WIDTH;
     }
 
     gameMap.startY = posY - (SCREEN_HEIGHT/2);
@@ -206,7 +203,6 @@ void MainObject::CheckToMap(Map& mapData){
                 posY -=  heightFrame +1;
                 valY =0;
                 onGround =true;
-                groundPos = posY;
                 jumpCooldown = jumpCooldown == 0 ?0: jumpCooldown -1 ;
             }
         }
@@ -214,7 +210,6 @@ void MainObject::CheckToMap(Map& mapData){
             if(mapData.tile[y1][x1] != BLANK_TILE || mapData.tile[y1][x2] != BLANK_TILE){
                 posY = (y1+1)*TILE_SIZE;
                 valY=0;
-                onGround =false;
             }
         }
     }
@@ -228,17 +223,17 @@ void MainObject::CheckToMap(Map& mapData){
         posX =0;
     }
 
-    if(posX + widthFrame - mapX > SCREEN_WIDTH){
+    if(posX + widthFrame - mapX >= SCREEN_WIDTH){
         posX = SCREEN_WIDTH-widthFrame -1;
     }
 
     if(posY <0){
         posY =0;
-        onGround =false;
     }
 
-    if(posY + heightFrame -mapY> SCREEN_HEIGHT){
-        posY = SCREEN_HEIGHT-heightFrame -1;
+    if(posY >= SCREEN_HEIGHT - TILE_SIZE -1){
+        posX =0;
+        posY =0;
     }
-    
+
 }
