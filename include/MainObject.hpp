@@ -22,6 +22,7 @@ class MainObject : public BaseObject {
     mapX = 0;
     mapY = 0;
     jumpCooldown =0;
+    isCameBack = true;
     };
     ~MainObject(){BaseObject::Free();};
 
@@ -59,6 +60,6 @@ class MainObject : public BaseObject {
     int mapY;
 
     float groundPosX;
-    float groundPosY;
+    bool isCameBack;
     int jumpCooldown;
 };

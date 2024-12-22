@@ -15,7 +15,7 @@ void MainObject::SetClip(){
         for(int i =0;i<8;i++){
             frameClip[i].x = i*widthFrame;
             frameClip[i].y = 0;
-            frameClip[i].w = widthFrame -5;
+            frameClip[i].w = widthFrame;
             frameClip[i].h = heightFrame;
         }
     }
@@ -44,13 +44,13 @@ void MainObject::Show(SDL_Renderer* renderer){
         frame =0;
     }
     else if(inputType.left == 1 || inputType.right ==1){
-        frame = ((++frame)%16);
+        frame = ((++frame)%24);
     } else {frame =0;};
 
     rect.x = posX - mapX;
     rect.y = posY - mapY;
 
-    SDL_Rect* currentClip = &frameClip[frame/2];
+    SDL_Rect* currentClip = &frameClip[frame/3];
     SDL_Rect renderQuad = {rect.x,rect.y,widthFrame,heightFrame};
 
     SDL_RenderCopy(renderer,objTex,currentClip,&renderQuad);
@@ -58,7 +58,7 @@ void MainObject::Show(SDL_Renderer* renderer){
 }
 
 void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
-    if(e.type == SDL_KEYDOWN){
+    if(e.type == SDL_KEYDOWN && isCameBack){
         switch (e.key.keysym.sym)
         {
         case SDLK_SPACE:
@@ -81,7 +81,7 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
         }
 
 
-    } else if( e.type ==SDL_KEYUP){
+    } else if( e.type ==SDL_KEYUP && isCameBack){
         switch (e.key.keysym.sym)
         {
         case SDLK_SPACE:
@@ -106,29 +106,34 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
 }
 
 void MainObject::DoPlayer(Map& mapData){
-    valX=0;
     valY += GRAVITY_SPEED;
-
+    
     if(valY > MAX_FALL_SPEED){
         valY = GRAVITY_SPEED;
     }
 
-    if(inputType.left==1){
-        valX -= PLAYER_SPEED;
-    }
-    if(inputType.right ==1){
-        valX += PLAYER_SPEED;
-    }
+    if(isCameBack){
 
-    if(inputType.jump ==1 && onGround && jumpCooldown == 0){
-        
-        valY = -12*GRAVITY_SPEED;
-        onGround = false;
-        jumpCooldown = JUMP_COOLDOWN;
-    }
+        valX=0;
 
-    CheckToMap(mapData);
-    CenterMap(mapData);
+
+        if(inputType.left==1){
+            valX -= PLAYER_SPEED;
+        }
+        if(inputType.right ==1){
+            valX += PLAYER_SPEED;
+        }
+
+        if(inputType.jump ==1 && onGround && jumpCooldown == 0){
+            
+            valY = -12*GRAVITY_SPEED;
+            onGround = false;
+            jumpCooldown = JUMP_COOLDOWN;
+        }
+
+    }
+        CheckToMap(mapData);
+        CenterMap(mapData);
 }
 
 void MainObject::CenterMap(Map& gameMap){
@@ -193,8 +198,6 @@ void MainObject::CheckToMap(Map& mapData){
 
     if(x1 >=0 && x2<MAX_MAP_X && y1>=0 && y2 < MAX_MAP_Y){
 
-        if(posY > groundPosY){onGround = false;};
-
         if(valY >0){
             if(mapData.tile[y2][x1] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
                 posY = y2*TILE_SIZE;
@@ -202,8 +205,8 @@ void MainObject::CheckToMap(Map& mapData){
                 valY =0;
                 onGround =true;
                 jumpCooldown = jumpCooldown == 0 ?0: jumpCooldown -1 ;
-                groundPosX = posX;
-                groundPosY = posY;
+                if(mapData.tile[y2][x1] != BLANK_TILE){groundPosX = x1;} else{groundPosX =x2;}
+                isCameBack = true;
             }
         }
         else if(valY <0){
@@ -231,8 +234,12 @@ void MainObject::CheckToMap(Map& mapData){
         posY =0;
     }
 
-    if(posY >= SCREEN_HEIGHT){
-        posX =groundPosX;
-        posY =groundPosY;
+    if(posY >= SCREEN_HEIGHT + 10){
+        posX =groundPosX*TILE_SIZE;
+        posY =-2*TILE_SIZE;
+        isCameBack = false;
+        valX =0;
+        inputType.right =0;
+        inputType.left =0;
     }
 }
