@@ -58,6 +58,7 @@ class MainObject : public BaseObject {
     int mapX;
     int mapY;
 
-    float groundPos;
+    float groundPosX;
+    float groundPosY;
     int jumpCooldown;
 };

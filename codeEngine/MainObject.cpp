@@ -15,7 +15,7 @@ void MainObject::SetClip(){
         for(int i =0;i<8;i++){
             frameClip[i].x = i*widthFrame;
             frameClip[i].y = 0;
-            frameClip[i].w = widthFrame;
+            frameClip[i].w = widthFrame -5;
             frameClip[i].h = heightFrame;
         }
     }
@@ -23,24 +23,22 @@ void MainObject::SetClip(){
 
 void MainObject::Show(SDL_Renderer* renderer){
     
-    if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1) && inputType.jump ==0){
+    if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1) ){
         if(status == WALK_LEFT){
-            LoadImg("save/player_left.png",renderer);
+            if(!onGround){
+                LoadImg("save/jum_left.png",renderer);
+            } else 
+            {LoadImg("save/player_left.png",renderer);}
+            
         }
         else {
-            LoadImg("save/player_right.png",renderer);
-        }
-    }
-    if(inputType.jump ==1 ){
-        if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1)){
-            if(status == WALK_LEFT){
-                LoadImg("save/jum_left.png",renderer);
-            }
-            else {
+            if(!onGround){
                 LoadImg("save/jum_right.png",renderer);
-            }
+            } else 
+            {LoadImg("save/player_right.png",renderer);}
         }
     }
+
     
     if(inputType.left == 1 && inputType.right ==1){
         frame =0;
@@ -162,16 +160,16 @@ void MainObject::CheckToMap(Map& mapData){
     int heightMin = heightFrame < TILE_SIZE ? heightFrame : TILE_SIZE;
 
     x1 = (posX + valX)/TILE_SIZE;
-    x2 = (posX + valX + heightFrame -1)/TILE_SIZE;
+    x2 = (posX + valX + widthFrame -1)/TILE_SIZE;
 
-    y1 = (posY+1)/TILE_SIZE;
+    y1 = (posY)/TILE_SIZE;
     y2 = (posY + heightMin -1)/TILE_SIZE;
 
-    if(x1 >=0 && x2<=MAX_MAP_X && y1>=0 && y2 <= MAX_MAP_Y){
+    if(x1 >=0 && x2<MAX_MAP_X && y1>=0 && y2 < MAX_MAP_Y){
         if(valX >0){
             if(mapData.tile[y1][x2] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
                 posX = x2*TILE_SIZE;
-                posX -=  widthFrame +1;
+                posX -=  (widthFrame +1);
                 valX =0;
             }
         }
@@ -188,22 +186,24 @@ void MainObject::CheckToMap(Map& mapData){
     int widthMin = widthFrame < TILE_SIZE ? widthFrame : TILE_SIZE;
 
     x1 = (posX)/TILE_SIZE;
-    x2 = (posX + widthMin )/TILE_SIZE;
+    x2 = (posX + widthMin)/TILE_SIZE;
 
     y1 = (posY + valY)/TILE_SIZE;
     y2 = (posY + valY + heightFrame -1)/TILE_SIZE;
 
-    if(x1 >=0 && x2<=MAX_MAP_X && y1>=0 && y2 <= MAX_MAP_Y){
+    if(x1 >=0 && x2<MAX_MAP_X && y1>=0 && y2 < MAX_MAP_Y){
 
-        if(posY > groundPos){onGround = false;};
+        if(posY > groundPosY){onGround = false;};
 
         if(valY >0){
             if(mapData.tile[y2][x1] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
                 posY = y2*TILE_SIZE;
-                posY -=  heightFrame +1;
+                posY -=  (heightFrame +1);
                 valY =0;
                 onGround =true;
                 jumpCooldown = jumpCooldown == 0 ?0: jumpCooldown -1 ;
+                groundPosX = posX;
+                groundPosY = posY;
             }
         }
         else if(valY <0){
@@ -231,9 +231,8 @@ void MainObject::CheckToMap(Map& mapData){
         posY =0;
     }
 
-    if(posY >= SCREEN_HEIGHT - TILE_SIZE -1){
-        posX =0;
-        posY =0;
+    if(posY >= SCREEN_HEIGHT){
+        posX =groundPosX;
+        posY =groundPosY;
     }
-
 }
