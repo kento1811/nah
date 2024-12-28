@@ -23,34 +23,20 @@ void MainObject::SetClip(){
 
 void MainObject::Show(SDL_Renderer* renderer){
     
-    if(!(status == WALK_LEFT && inputType.right ==1 || status ==WALK_RIGHT && inputType.left ==1) ){
-        if(status == WALK_LEFT){
-            if(!onGround){
-                LoadImg("save/jum_left.png",renderer);
-            } else 
-            {LoadImg("save/player_left.png",renderer);}
-            
-        }
-        else {
-            if(!onGround){
-                LoadImg("save/jum_right.png",renderer);
-            } else 
-            {LoadImg("save/player_right.png",renderer);}
-        }
-    }
+    LoadImgPlayer(renderer);
 
     
     if(inputType.left == 1 && inputType.right ==1){
         frame =0;
     }
     else if(inputType.left == 1 || inputType.right ==1){
-        frame = ((++frame)%24);
+        frame = ((++frame)%35);
     } else {frame =0;};
 
     rect.x = posX - mapX;
     rect.y = posY - mapY;
 
-    SDL_Rect* currentClip = &frameClip[frame/3];
+    SDL_Rect* currentClip = &frameClip[frame/5];
     SDL_Rect renderQuad = {rect.x,rect.y,widthFrame,heightFrame};
 
     SDL_RenderCopy(renderer,objTex,currentClip,&renderQuad);
@@ -58,24 +44,39 @@ void MainObject::Show(SDL_Renderer* renderer){
 }
 
 void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
+    if(e.type == SDL_KEYDOWN){
+        if(e.key.keysym.sym == SDLK_SPACE){
+            BulletObject* bullet = new BulletObject();
+            if(status == WALK_LEFT){
+                bullet->LoadImg("./save/bullet_left.png",renderer);
+                bullet->setStatus(-1);
+                bullet->SetRect({int(rect.x-1) ,int(rect.y +heightFrame*0.3 ),11,10});
+                
+            } else if(status == WALK_RIGHT){
+                bullet->LoadImg("./save/bullet_right.png",renderer);
+                bullet->setStatus(1);
+                bullet->SetRect({int(rect.x+widthFrame+1) ,int(rect.y +heightFrame*0.3),11,10});
+            }
+            bullet->setX(posX);
+            bullet->setShoot(true);
+            BulletList.push_back(bullet);
+        }
+    }
     if(e.type == SDL_KEYDOWN && isCameBack){
         switch (e.key.keysym.sym)
         {
-        case SDLK_SPACE:
         case SDLK_UP:
         case SDLK_w:
-            inputType.jump =jumpCooldown !=0 ? 0:1;
+            inputType.jump =1;
             break;
 
         case SDLK_RIGHT:
         case SDLK_d:
-            status = WALK_RIGHT;
             inputType.right = 1;
             break;
 
         case SDLK_LEFT:
         case SDLK_a:
-            status = WALK_LEFT;
             inputType.left = 1;
             break;
         }
@@ -84,11 +85,9 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
     } else if( e.type ==SDL_KEYUP && isCameBack){
         switch (e.key.keysym.sym)
         {
-        case SDLK_SPACE:
         case SDLK_UP:
         case SDLK_w:
             inputType.jump =0;
-            jumpCooldown = JUMP_COOLDOWN;
             break;
 
         case SDLK_RIGHT:
@@ -102,6 +101,12 @@ void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
             break;
 
         }
+    }
+
+    if(inputType.right){
+        status = WALK_RIGHT;
+    } else if(inputType.left){
+        status = WALK_LEFT;
     }
 }
 
@@ -124,17 +129,38 @@ void MainObject::DoPlayer(Map& mapData){
             valX += PLAYER_SPEED;
         }
 
-        if(inputType.jump ==1 && onGround && jumpCooldown == 0){
+        if(inputType.jump ==1 && onGround){
             
             valY = -12*GRAVITY_SPEED;
             onGround = false;
-            jumpCooldown = JUMP_COOLDOWN;
         }
 
     }
+    
         CheckToMap(mapData);
         CenterMap(mapData);
 }
+
+void MainObject::HandleBullet(SDL_Renderer* renderer,Map& mapData){
+    for(int i = 0 ;i< BulletList.size();i++){
+        BulletObject* bullet = BulletList.at(i);
+        if(bullet != NULL){
+            if(bullet->isMove())
+            {
+                bullet->HandleMove(mapData);
+                bullet->Render(renderer);
+            } else {
+                BulletList.erase(BulletList.begin() +i);
+
+                if(bullet != NULL){
+                    delete bullet;
+                    bullet = NULL;
+                }
+            }
+        }
+    }
+}
+
 
 void MainObject::CenterMap(Map& gameMap){
 
@@ -161,6 +187,7 @@ void MainObject::CheckToMap(Map& mapData){
     int y1 = 0;
     int y2 = 0;
 
+    
     //check Horizontal  
     int heightMin = heightFrame < TILE_SIZE ? heightFrame : TILE_SIZE;
 
@@ -171,18 +198,23 @@ void MainObject::CheckToMap(Map& mapData){
     y2 = (posY + heightMin -1)/TILE_SIZE;
 
     if(x1 >=0 && x2<MAX_MAP_X && y1>=0 && y2 < MAX_MAP_Y){
+
         if(valX >0){
             if(mapData.tile[y1][x2] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
-                posX = x2*TILE_SIZE;
-                posX -=  (widthFrame +1);
-                valX =0;
+                if(!Colision(mapData,x1,x2,y1,y2)){
+                    posX = x2*TILE_SIZE;
+                    posX -=  (widthFrame +1);
+                    valX =0;
+                }
             }
         }
 
         else if(valX <0){
             if(mapData.tile[y1][x1] != BLANK_TILE || mapData.tile[y2][x1] != BLANK_TILE){
-                posX = (x1+1)*TILE_SIZE;
-                valX=0;
+                if(!Colision(mapData,x1,x2,y1,y2)){
+                    posX = (x1+1)*TILE_SIZE;
+                    valX=0;
+                }
             }
         }
     }
@@ -200,19 +232,24 @@ void MainObject::CheckToMap(Map& mapData){
 
         if(valY >0){
             if(mapData.tile[y2][x1] != BLANK_TILE || mapData.tile[y2][x2] != BLANK_TILE){
-                posY = y2*TILE_SIZE;
-                posY -=  (heightFrame +1);
-                valY =0;
-                onGround =true;
-                jumpCooldown = jumpCooldown == 0 ?0: jumpCooldown -1 ;
-                if(mapData.tile[y2][x1] != BLANK_TILE){groundPosX = x1;} else{groundPosX =x2;}
-                isCameBack = true;
+                if(!Colision(mapData,x1,x2,y1,y2)){
+                    posY = y2*TILE_SIZE;
+                    posY -=  (heightFrame +1);
+                    valY =0;
+                    onGround =true;
+                    if(mapData.tile[y2][x1] != BLANK_TILE){groundPosX = x1;} else{groundPosX =x2;}
+                    isCameBack = true;
+                }
+            } else {
+                onGround = false;
             }
         }
         else if(valY <0){
             if(mapData.tile[y1][x1] != BLANK_TILE || mapData.tile[y1][x2] != BLANK_TILE){
-                posY = (y1+1)*TILE_SIZE;
-                valY=0;
+                if(!Colision(mapData,x1,x2,y1,y2)){
+                    posY = (y1+1)*TILE_SIZE;
+                    valY=0;
+                }
             }
         }
     }
@@ -241,5 +278,52 @@ void MainObject::CheckToMap(Map& mapData){
         valX =0;
         inputType.right =0;
         inputType.left =0;
+        inputType.jump =0;
     }
+}
+
+void MainObject::LoadImgPlayer(SDL_Renderer* renderer){
+
+        if(onGround){
+            if(status == WALK_LEFT){
+                LoadImg("./save/player_left.png",renderer);
+            }
+            else if(status ==WALK_RIGHT){
+                LoadImg("./save/player_right.png",renderer);
+            }
+        }
+        else{
+            if(status == WALK_LEFT){
+                LoadImg("./save/jum_left.png",renderer);
+            }
+            else if(status == WALK_RIGHT){
+                LoadImg("./save/jum_right.png",renderer);
+            }
+        }
+
+}
+
+bool MainObject::Colision(Map& mapData,int x1,int x2,int y1,int y2){
+    int ax[2] , ay[2];
+    ax[0] = x1;
+    ax[1] = x2;
+    ay[0] = y1;
+    ay[1] = y2;
+    bool isColision = false;
+    
+    for(int i =0 ; i<2;i++){
+        for(int j = 0 ; j<2;j++){
+            if(mapData.tile[ay[i]][ax[j]] == 4){
+                mapData.tile[ay[i]][ax[j]] = 0;
+                score++;
+                isColision = true;
+            }
+            if(ax[j] == 392 && ay[i] == 7){
+                mapData.tile[ay[i]][ax[j]] = 2;
+                posY -= 64;
+            }
+        }
+    }
+
+    return isColision;
 }

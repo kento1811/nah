@@ -1,6 +1,8 @@
 #pragma once
 
 #include"BaseObject.hpp"
+#include"BulletObject.hpp"
+#include<vector>
 
 class MainObject : public BaseObject {
     public:
@@ -21,8 +23,8 @@ class MainObject : public BaseObject {
     status = -1;
     mapX = 0;
     mapY = 0;
-    jumpCooldown =0;
-    isCameBack = true;
+    isCameBack = true; 
+    score =0;
     };
     ~MainObject(){BaseObject::Free();};
 
@@ -38,6 +40,11 @@ class MainObject : public BaseObject {
     void CheckToMap(Map& mapData);
     void SetMapXY(int X, int Y){mapX = X; mapY = Y;};
     void CenterMap(Map& gameMap);
+    void LoadImgPlayer(SDL_Renderer* renderer);
+    int getStatus(){return status;}
+    bool Colision(Map& mapData,int x1,int x2,int y1,int y2);
+    int GetScore(){return score;};
+    void HandleBullet(SDL_Renderer* renderer,Map& mapdata);
 
     private:
     bool onGround;
@@ -61,5 +68,9 @@ class MainObject : public BaseObject {
 
     float groundPosX;
     bool isCameBack;
-    int jumpCooldown;
+
+    int score;
+
+    std::vector<BulletObject*> BulletList;
+
 };

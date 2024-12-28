@@ -2,9 +2,11 @@
 
 #include<windows.h>
 #include<string.h>
-#include <stdio.h>
+#include<iostream>
 #include"../bin/SDL2/SDL.h"
 #include"../bin/SDL2/SDL_image.h"
+#include"../bin/SDL2/SDL_ttf.h"
+
 #include<iostream>
 
 #define GRAVITY_SPEED 3
@@ -28,6 +30,7 @@
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static SDL_Event gEvent;
+static TTF_Font* Sans = TTF_OpenFont("save/open-sans/OpernSans-Regular.ttf", 12);
 
 struct Input
 {
@@ -50,3 +53,17 @@ struct Map{
 
 };
 
+class font{
+    public:
+    ~font();
+    void loadFont(SDL_Renderer* renderer,std::string path,int size,SDL_Color color);
+    void setMess(const char* message,SDL_Renderer* renderer);
+    void setRect(SDL_Rect rect);
+    void render(SDL_Renderer* renderer);
+    private:
+    SDL_Surface* surfaceMessage;
+    SDL_Texture* Message;
+    TTF_Font* font;
+    SDL_Color color;
+    SDL_Rect rectMess;
+};

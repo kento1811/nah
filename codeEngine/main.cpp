@@ -4,8 +4,9 @@
 #include"../include/BaseObject.hpp"
 #include"../include/GameMap.hpp"
 #include"../include/MainObject.hpp"
+#include"../include/BulletObject.hpp"
 
-//g++ codeEngine/*.cpp -o main -Llib -lSDL2 -lSDL2_image
+//g++ codeEngine/*.cpp -o main -Llib -lSDL2 -lSDL2_image -lSDL2_ttf
 //git add *
 //git commit -m " "
 //git push origin master
@@ -18,7 +19,10 @@ void init(){
         std::cout<<"SDL_Init video had failed "<<SDL_GetError()<<"\n";
     }
     if(!IMG_Init(IMG_INIT_PNG)){
-        std::cout<<"IMG_Init png had failed "<<SDL_GetError()<<"\n";
+        std::cout<<"IMG_Init png had failed "<<IMG_GetError()<<"\n";
+    }
+    if(TTF_Init() == -1){
+        std::cout<<"TTF_Init had failed "<<TTF_GetError()<<"\n";
     }
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"1");
@@ -40,6 +44,7 @@ void Close(){
     SDL_DestroyWindow(gWindow);
     SDL_DestroyRenderer(gRenderer);
 
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -49,19 +54,24 @@ int main(int argc, char* argv[]){
     loadBackGround();
     GameMap map;
     char mapName[20] = "save/map01.dat";
+    font scoreMess;
+    char score[15];
     map.LoadMap(mapName);
     map.LoadTile(gRenderer);
+    scoreMess.loadFont(gRenderer,"save/open-sans/OpenSans-Regular.ttf",12,{255,255,255});
 
     MainObject player;
+    scoreMess.setRect({0,0,200,100});
     player.SetRect({0,0,480,64});
     player.LoadImg("save/player_right.png",gRenderer);
     player.SetClip();
+
 
     int fps = 1000/FRAME_RATE;
     bool isRunning =true;
     while(isRunning){
         int frameRateStart = SDL_GetTicks();
-
+        sprintf(score,"score: %d",player.GetScore());
         while(SDL_PollEvent(&gEvent) != 0){
             if(gEvent.type == SDL_QUIT){
                 isRunning = false;
@@ -77,13 +87,15 @@ int main(int argc, char* argv[]){
         
 
         Map mapData = map.getMap();
-
+        player.HandleBullet(gRenderer,mapData);
         player.SetMapXY(mapData.startX,mapData.startY);
         player.DoPlayer(mapData);
         player.Show(gRenderer);
+        scoreMess.setMess(score,gRenderer);
 
         map.SetMap(mapData);
         map.DrawMap(gRenderer);
+        scoreMess.render(gRenderer);
 
         SDL_RenderPresent(gRenderer);
 
@@ -94,7 +106,6 @@ int main(int argc, char* argv[]){
         }
         
     }
-
     Close();
     return 0;
 }
