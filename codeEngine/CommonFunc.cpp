@@ -1,4 +1,7 @@
+#define SDL_MAIN_HANDLED
+
 #include"../include/CommonFunc.hpp"
+
 
 font::~font(){
     SDL_FreeSurface(surfaceMessage);
@@ -24,5 +27,10 @@ void font::setRect(SDL_Rect rect){
 void font::render(SDL_Renderer* renderer){
     Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
     SDL_RenderCopy(renderer, Message, NULL, &rectMess);
+
+}
+
+namespace storage{
+     int score =0;
 
 }

@@ -76,12 +76,40 @@ void GameMap::DrawMap(SDL_Renderer* renderer){
             for(int j = x1;j<x2;j+=TILE_SIZE){
 
                 int val =gameMap.tile[mapY][mapX];
-                if(val>0){
+                if(val == 20){
+                    enemyObject* enemy = new enemyObject();
+                    enemy->LoadImg("save/cat.png",renderer);
+                    enemy->setRect({mapX*TILE_SIZE,mapY*TILE_SIZE,512,64});
+                    enemy->SetClip();
+                    gameMap.tile[mapY][mapX] = 0;
+                    val = 0;
+                    enemyList.push_back(enemy);
+                }
+                if(val>0 && val !=12 ){
                     tileMat[val].SetRect({j,i,TILE_SIZE,TILE_SIZE});
                     tileMat[val].Render(renderer);
                 }
                 mapX++;
             }
             mapY++;
+        }
+
+        for(int i =0 ;i<enemyList.size();i++){
+            enemyObject* enemy = enemyList.at(i);
+            if(enemy != NULL){
+                if(enemy->isAlive()){
+                    enemy->HandleMove(gameMap);
+                    enemy->Show(renderer,gameMap.startX,gameMap.startY);
+                } else{
+                    enemyList.erase(enemyList.begin()+i);
+                    
+                    if(enemy != NULL){
+                        delete enemy;
+                        enemy = NULL;           
+                    }
+
+                }
+            }
+
         }
 }

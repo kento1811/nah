@@ -3,7 +3,7 @@
 
 class BaseObject{
     public:
-    BaseObject(){;};
+    BaseObject(){};
     ~BaseObject(){;};
 
     void SetRect(SDL_Rect p_rect){rect.x =p_rect.x;rect.y =p_rect.y;rect.w =p_rect.w;rect.h=p_rect.h;};

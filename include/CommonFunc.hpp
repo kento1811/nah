@@ -67,3 +67,8 @@ class font{
     SDL_Color color;
     SDL_Rect rectMess;
 };
+
+namespace storage{
+    extern int score;
+
+}

@@ -6,7 +6,7 @@
 void MainObject::LoadImg(const char* path,SDL_Renderer* renderer){
     BaseObject::LoadImg(path,renderer);
 
-    widthFrame = rect.w/8;
+    widthFrame = rect.w/7;
     heightFrame = rect.h;
 }
 
@@ -25,14 +25,11 @@ void MainObject::Show(SDL_Renderer* renderer){
     
     LoadImgPlayer(renderer);
 
-    
-    if(inputType.left == 1 && inputType.right ==1){
+    if(inputType.right == inputType.left){
         frame =0;
-    }
-    else if(inputType.left == 1 || inputType.right ==1){
-        frame = ((++frame)%35);
-    } else {frame =0;};
+    } else {frame = ((++frame)%35);}
 
+ 
     rect.x = posX - mapX;
     rect.y = posY - mapY;
 
@@ -45,17 +42,18 @@ void MainObject::Show(SDL_Renderer* renderer){
 
 void MainObject::HandleInputAction(SDL_Event e,SDL_Renderer* renderer){
     if(e.type == SDL_KEYDOWN){
-        if(e.key.keysym.sym == SDLK_SPACE){
+        if(e.key.keysym.sym == SDLK_SPACE && bulletCoolDown == 0){
+            bulletCoolDown = 5;
             BulletObject* bullet = new BulletObject();
             if(status == WALK_LEFT){
                 bullet->LoadImg("./save/bullet_left.png",renderer);
                 bullet->setStatus(-1);
-                bullet->SetRect({int(rect.x-1) ,int(rect.y +heightFrame*0.3 ),11,10});
+                bullet->SetRect({int(rect.x-1) ,int(rect.y +heightFrame*0.27 ),11,10});
                 
             } else if(status == WALK_RIGHT){
                 bullet->LoadImg("./save/bullet_right.png",renderer);
                 bullet->setStatus(1);
-                bullet->SetRect({int(rect.x+widthFrame+1) ,int(rect.y +heightFrame*0.3),11,10});
+                bullet->SetRect({int(rect.x+widthFrame+1) ,int(rect.y +heightFrame*0.27),11,10});
             }
             bullet->setX(posX);
             bullet->setShoot(true);
@@ -141,14 +139,17 @@ void MainObject::DoPlayer(Map& mapData){
         CenterMap(mapData);
 }
 
-void MainObject::HandleBullet(SDL_Renderer* renderer,Map& mapData){
+void MainObject::HandleBullet(SDL_Renderer* renderer,Map& mapData,std::vector<enemyObject*> enemyList){
+    bulletCoolDown--;
+    if(bulletCoolDown <0){bulletCoolDown =0;}
     for(int i = 0 ;i< BulletList.size();i++){
         BulletObject* bullet = BulletList.at(i);
         if(bullet != NULL){
             if(bullet->isMove())
             {
-                bullet->HandleMove(mapData);
-                bullet->Render(renderer);
+                if(bullet->HandleMove(mapData,enemyList)){
+                    bullet->Render(renderer);
+                }
             } else {
                 BulletList.erase(BulletList.begin() +i);
 
@@ -279,6 +280,7 @@ void MainObject::CheckToMap(Map& mapData){
         inputType.right =0;
         inputType.left =0;
         inputType.jump =0;
+        storage::score = storage::score -1 <0? 0 : storage::score-1;
     }
 }
 
@@ -315,12 +317,13 @@ bool MainObject::Colision(Map& mapData,int x1,int x2,int y1,int y2){
         for(int j = 0 ; j<2;j++){
             if(mapData.tile[ay[i]][ax[j]] == 4){
                 mapData.tile[ay[i]][ax[j]] = 0;
-                score++;
+                storage::score++;
                 isColision = true;
             }
-            if(ax[j] == 392 && ay[i] == 7){
-                mapData.tile[ay[i]][ax[j]] = 2;
-                posY -= 64;
+            if(mapData.tile[ay[i]][ax[j]] == 12){
+                mapData.tile[ay[i]][ax[j]] = 0;
+                mapData.tile[ay[i]+1][ax[j]] = 2;
+                isColision = true;
             }
         }
     }

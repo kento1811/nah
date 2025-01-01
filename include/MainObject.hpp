@@ -2,7 +2,9 @@
 
 #include"BaseObject.hpp"
 #include"BulletObject.hpp"
+#include"enemyObject.hpp"
 #include<vector>
+
 
 class MainObject : public BaseObject {
     public:
@@ -24,7 +26,8 @@ class MainObject : public BaseObject {
     mapX = 0;
     mapY = 0;
     isCameBack = true; 
-    score =0;
+    bulletCoolDown = 0;
+    score = 0;
     };
     ~MainObject(){BaseObject::Free();};
 
@@ -41,10 +44,10 @@ class MainObject : public BaseObject {
     void SetMapXY(int X, int Y){mapX = X; mapY = Y;};
     void CenterMap(Map& gameMap);
     void LoadImgPlayer(SDL_Renderer* renderer);
-    int getStatus(){return status;}
+    int getStatus(){return status;};
+    int getScore(){return score;};
     bool Colision(Map& mapData,int x1,int x2,int y1,int y2);
-    int GetScore(){return score;};
-    void HandleBullet(SDL_Renderer* renderer,Map& mapdata);
+    void HandleBullet(SDL_Renderer* renderer,Map& mapdata,std::vector<enemyObject*> enemyList);
 
     private:
     bool onGround;
@@ -70,6 +73,8 @@ class MainObject : public BaseObject {
     bool isCameBack;
 
     int score;
+
+    int bulletCoolDown;
 
     std::vector<BulletObject*> BulletList;
 

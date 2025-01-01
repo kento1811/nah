@@ -52,17 +52,18 @@ void Close(){
 int main(int argc, char* argv[]){
     init();
     loadBackGround();
+
     GameMap map;
     char mapName[20] = "save/map01.dat";
     font scoreMess;
-    char score[15];
+    char scoreChar[15];
     map.LoadMap(mapName);
     map.LoadTile(gRenderer);
     scoreMess.loadFont(gRenderer,"save/open-sans/OpenSans-Regular.ttf",12,{255,255,255});
 
     MainObject player;
     scoreMess.setRect({0,0,200,100});
-    player.SetRect({0,0,480,64});
+    player.SetRect({0,0,420,64});
     player.LoadImg("save/player_right.png",gRenderer);
     player.SetClip();
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[]){
     bool isRunning =true;
     while(isRunning){
         int frameRateStart = SDL_GetTicks();
-        sprintf(score,"score: %d",player.GetScore());
+        sprintf(scoreChar,"score: %d",storage::score);
         while(SDL_PollEvent(&gEvent) != 0){
             if(gEvent.type == SDL_QUIT){
                 isRunning = false;
@@ -87,11 +88,11 @@ int main(int argc, char* argv[]){
         
 
         Map mapData = map.getMap();
-        player.HandleBullet(gRenderer,mapData);
+        player.HandleBullet(gRenderer,mapData,map.getEnemyList());
         player.SetMapXY(mapData.startX,mapData.startY);
         player.DoPlayer(mapData);
         player.Show(gRenderer);
-        scoreMess.setMess(score,gRenderer);
+        scoreMess.setMess(scoreChar,gRenderer);
 
         map.SetMap(mapData);
         map.DrawMap(gRenderer);
